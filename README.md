@@ -14,8 +14,8 @@
 
 ### 2026-04-27
 1. The official dataset has been released in the `dataset` directory.
-2. The information on the [tested models](#evaluation-operations-and-specifications) has been updated.
-3. The [attack sample validity check rules](#attack-sample-validity-check) have been updated. The corresponding self-check script has been released in the `validate` directory.
+2. The information on the [Available Tracks and Model Scope](#evaluation-operations-and-specifications) has been updated.
+3. The [Attack Sample Validity Check](#attack-sample-validity-check) rules have been updated. The corresponding self-check script has been released in the `validate` directory.
 4. Additional note: API costs incurred during the preliminary exploration and testing stage shall be borne by participating teams themselves. The evaluation system backend and leaderboard URL will become available during the leaderboard competition stage (June 11–June 20). Participating teams will be notified by email before the system opens.
 
 
@@ -105,9 +105,7 @@ This evaluation sets up two parallel and independent tracks. Participating teams
 | Official API Pricing | Approx. ¥0.74 / 1M input tokens, ¥2.95 / 1M output tokens | Cache-hit input: ¥0.02 / 1M tokens; cache-miss input: ¥1.00 / 1M tokens; output: ¥2.00 / 1M tokens |
 | API Website | [Alibaba Cloud Model Studio / DashScope](https://www.alibabacloud.com/help/en/model-studio/qwen-api-via-dashscope) | [DeepSeek API Docs](https://api-docs.deepseek.com/) |
 
-> Note: Qwen’s official pricing is denominated in USD; the RMB prices shown in the table are rough estimates based on 1 USD ≈ 6.84 RMB. DeepSeek’s official pricing is denominated in RMB. API prices may change depending on the official platform, deployment region, cache-hit status, or promotional activities. Actual costs should be based on the real-time prices listed on the respective official platforms.
-
-> Clarification: During the leaderboard competition stage, the evaluation system backend will call the models through the two official API websites listed above. Therefore, to ensure consistency of the testing environment, participating teams are encouraged to use the same platforms for model invocation and testing. Participating teams may also choose other third-party API platforms that provide the designated models; teams with sufficient computing resources may also attempt local deployment for testing.
+> Note: API prices may change depending on the official platform, deployment region, cache-hit status, or promotional activities. Actual costs should be based on the real-time prices listed on the respective official platforms. During the leaderboard competition stage, the evaluation system backend will call the models through the two official API websites listed above. Therefore, to ensure consistency of the testing environment, participating teams are recommended to use the same platforms for model invocation and testing.
 
 ### (2) Prompt Template & Parameter Configuration
 ```text
