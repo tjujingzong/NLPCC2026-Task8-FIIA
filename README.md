@@ -161,7 +161,7 @@ The adapted sentence must remain basically natural and coherent in terms of ling
 
 If this score is lower than 0.6, the sample will be judged as invalid.
 
-### Self-Check Script and Program
+### Script and Program for Self-Check
 
 The algorithmic implementations of the above validity check rules, including the Python validation script and the supporting language model, have been released in the `validate` directory of this repository. Participating teams are encouraged to use the self-check script (`validate.py`) during the data adaptation process to conduct basic format checks and validity checks on their samples, so as to minimize submission errors or invalid samples caused by validity issues.
 
