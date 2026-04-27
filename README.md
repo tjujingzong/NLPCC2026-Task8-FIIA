@@ -131,25 +131,45 @@ In addition, all resources used by the participating teams need to be detailed i
 
 ## Attack Sample Validity Check
 
-To prevent participating teams from inducing unstable model outputs through cheating methods such as inputting meaningless characters or destroying syntactic structures, this evaluation implements a validity check for attack samples. All submitted adapted items must pass the following three automated checks before entering the scoring phase:
+To prevent participating teams from inducing unstable model outputs through large-scale rewriting, deletion of core factive information, or disruption of basic syntactic structures, this evaluation implements a validity check for attack samples. All submitted adapted data must pass the following three automated checks before entering the scoring phase. The leaderboard system will calculate scores only for valid sample sets that pass the validity check.
 
 ### (1) Core Component Retention Check
 
-The adapted background sentence (`text_attacked`) must completely retain the two core linguistic components from the original data: the "factive predicate" (`predicate`) and the "clause to be judged" (`hypothesis`). If the core components are tampered with, deleted, or their word order is scrambled, the sample is directly judged as invalid.
+The adapted background sentence (`text_attack`) must retain the core factive information from the original data:
 
-### (2) Text Modification Degree Check
+1. The adapted sentence must contain the factive predicate (`predicate`) from the original sample. If the predicate is missing from the adapted sentence, or if the predicate field in the submitted data is inconsistent with the original data, the sample will be judged as invalid.
 
-To ensure that the attack samples only undergo minor perturbations based on the original context rather than being rewritten on a large scale, the system will calculate the text similarity between the adapted sentence and the original sentence. This check uses the character-level Levenshtein Ratio to quantify the extent of text modification (including addition, deletion, and modification operations):
+2. The adapted sentence should sufficiently retain the core content of the original clause to be judged (`hypothesis`). The system will calculate the Longest Common Subsequence Coverage (LCS Coverage) between the `hypothesis` and the adapted sentence. If the coverage is lower than 0.7, it indicates that the core content of the clause to be judged is insufficiently retained, and the sample will be judged as invalid.
 
-$$Ratio(A,B)=\frac{|A|+|B|-L(A,B)}{|A|+|B|}$$
-    
-Taking the adaptation of original sentence A "他知道局面已经不可挽回" (He knows that the situation is irreversible) to sentence B "他不知道局面已经不可挽回" (He does not know that the situation is irreversible) as an example, the modification operation only inserts one character "不" (not), so the edit distance $L(A,B)=1$. This results in $Ratio(A,B) = (11+12-1)/(11+12) = 22/23 \approx 0.957$. We require that the modification ratio must not exceed 40% (i.e., $Ratio \geq 0.6$). If it is below this threshold, it indicates that the modification is too extensive and deviates from the constraints of the original item, and the sample will be directly judged as invalid.
+### (2) Text Retention Check
+
+To ensure that attack samples mainly introduce limited perturbations based on the original context, rather than rewriting the original sentence on a large scale, the system will calculate the text retention score between the adapted sentence and the original sentence. We use a character-level edit distance algorithm (Levenshtein Ratio) to quantify the degree of text modification, including insertion, deletion, and substitution operations:
+
+$$Similarity(A,B)=1-\frac{L(A,B)}{\max(|A|,|B|)}$$
+
+where $A$ denotes the original background sentence, $B$ denotes the adapted background sentence, $L(A,B)$ denotes the character-level Levenshtein edit distance between them, and $|A|$ and $|B|$ denote their character lengths.
+
+For example, if the original sentence A, “他知道局面已经不可挽回。” (“He knows that the situation is irreversible.”), is adapted into sentence B, “他不知道局面已经不可挽回。” (“He does not know that the situation is irreversible.”), the only modification is the insertion of one character, “不” (“not”), so the edit distance is $L(A,B)=1$. The length of the original sentence is 12, and the length of the adapted sentence is 13. Therefore:
+
+$$Similarity(A,B)=1-\frac{1}{\max(12,13)}=1-\frac{1}{13}\approx0.923$$
+
+If the text retention score is lower than 0.65, it indicates that the modification is too extensive, and the sample will be judged as invalid.
 
 ### (3) Semantic Fluency Check
 
-The adapted sentences must remain naturally fluent in terms of linguistic intuition and grammar. The system will use an LLM-as-a-judge mode (combining preset rules and a semantic fluency scorer) to automatically score the samples. The scoring interval is [0, 1], and samples with a score < 0.6 will be judged as invalid.
+The adapted sentence must remain basically natural and coherent in terms of linguistic intuition and grammar. The system will use an automatic fluency scoring method based on language model loss to evaluate the degree of fluency degradation of the adapted sentence relative to the original sentence.
 
-After receiving a submission, the evaluation system will first run the above three admission checks. If there is invalid data in the sample set, the system will reject the submission and return the data IDs (`d_id`) of the invalid samples. The leaderboard system will ultimately only calculate scores for valid sample sets that pass the validity admission.
+Specifically, the system uses the open-source Chinese MacBERT model [hfl/chinese-macbert-base](https://huggingface.co/hfl/chinese-macbert-base) to calculate the language model loss of the original background sentence and the adapted background sentence, respectively. If the loss of the adapted sentence increases significantly compared with that of the original sentence, it suggests that the adaptation may have introduced unnatural expressions, structural disruption, or abnormal characters. The system will calculate a fluency score according to the degree of loss degradation. The score ranges from [0, 1]. Samples with a score lower than 0.6 will be judged as invalid.
+
+### Self-Check Script and Program
+
+The algorithmic implementations of the above validity check rules, including the Python validation script and the supporting language model, have been released in the `validate` directory of this repository. Participating teams are encouraged to use the self-check script (`validate.py`) during the data adaptation process to conduct basic format checks and validity checks on their samples, so as to minimize submission errors or invalid samples caused by validity issues.
+
+During the later leaderboard competition stage, the validity determination program used by the evaluation system backend will remain fully consistent with the publicly released self-check program.
+
+At present, the self-check script needs to be downloaded locally by participating teams and run through a Python interpreter. To lower the usage barrier, the organizers are developing a simple graphical user interface program to help participating teams validate their data more conveniently. The graphical program is expected to be released within one week, and the organizers will notify all participating teams by email at that time.
+
+If there are any questions regarding the validity check, participating teams are welcome to contact the organizers by email.
 
 
 # Evaluation Metric (Updating)
