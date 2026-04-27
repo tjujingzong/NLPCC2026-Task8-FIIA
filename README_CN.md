@@ -84,14 +84,14 @@
 
 参赛队伍需要通过API对模型进行独立的多轮提示（Multi-turn Prompting）。要求模型基于`text`字段的值来判断`hypothesis`字段的真值，记录模型返回的结果（T/F/U），并自查其自洽率。模型的选择范围、提示模板以及其他与评测相关的环境参数变量由组织方统一指定。
 
-### (1) 可选模型范围（暂定）
+### (1) 可选赛道及模型范围
 
 为了全面、公平地评估攻击策略的有效性，本评测设立了两个平行的独立赛道。每个赛道受测模型的具体版本由组织者唯一指定：
 
-| 模型系列 | 赛道名称 | 具体模型 (API节点) |
+| 赛道 | 模型系列 | 模型名称 (API节点) | 发布时间 ｜ 参数量 ｜ 备注
 | :--- | :--- | :--- |
-| Qwen | 赛道 A | Qwen2.5-72B-Instruct |
-| DeepSeek | 赛道 B | DeepSeek-V3 |
+| A | Qwen  | Qwen/Qwen3-30B-A3B-Instruct-2507 | 2025-07 ｜ 总参数 30.5B，激活参数 3.3B | 非思考模式。API官网：[https://www.alibabacloud.com/help/en/model-studio/qwen-api-via-dashscope](https://www.alibabacloud.com/help/en/model-studio/qwen-api-via-dashscope)。
+| B | DeepSeek | deepseek-v4-flash | 2026-04 | 总参数 284B，激活参数 13B | 非思考模式（thinking disabled）。API官网：[https://api-docs.deepseek.com/zh-cn/](https://api-docs.deepseek.com/zh-cn/)
 
 选择 Qwen 和 DeepSeek 系列作为测试基线主要基于以下三点考虑：
 1.  它们是目前公认代表中文LLMs最高水平的基础模型，确保了本次评测的有效性和前沿性。
