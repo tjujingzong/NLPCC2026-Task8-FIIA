@@ -106,9 +106,7 @@
 | 官方 API 价格 | 约 ¥0.74 / 1M 输入 tokens，¥2.95 / 1M 输出 tokens | 缓存命中输入 ¥0.02 / 1M tokens；缓存未命中输入 ¥1.00 / 1M tokens；输出 ¥2.00 / 1M tokens |
 | API 官网 | [Alibaba Cloud Model Studio / DashScope](https://www.alibabacloud.com/help/zh/model-studio/qwen-api-via-dashscope) | [DeepSeek API Docs](https://api-docs.deepseek.com/zh-cn/) |
 
-> 注：API 价格可能随官方平台、部署区域、缓存命中情况或优惠活动变化而调整，实际费用以各官方平台的实时价格为准。
-
-> 说明：在冲榜阶段，评测系统后台将分别通过上述的两个API官网进行模型调用测试；因此为保证测试环境的一致性，建议参赛队伍优先通过相同平台进行模型的调用测试。参赛队伍也可自行选择其他提供指定模型的第三方 API 平台；具备充足算力资源的队伍亦可尝试本地部署测试。
+> 注：API 价格可能随官方平台、部署区域、缓存命中情况或优惠活动变化而调整，实际费用以各官方平台的实时价格为准。在冲榜阶段，评测系统后台将分别通过上述的两个API官网进行模型调用测试；因此为保证测试环境的一致性，推荐参赛队伍考虑使用相同平台进行模型的调用测试。
 
 ### (2) 提示词与参数配置
 
