@@ -86,22 +86,25 @@
 
 ### (1) 可选赛道及模型范围
 
-为了全面、公平地评估攻击策略的有效性，本评测设立了两个平行的独立赛道。每个赛道受测模型的具体版本由组织者唯一指定：
+本评测设立两个平行且相互独立的赛道，参赛队伍可选择 Qwen 或 DeepSeek 系列模型作为攻击对象。二者均为当前中文大语言模型中具有代表性的基础模型，有助于保证本次评测的有效性与前沿性。同时，二者的 API 调用成本相对可控，并均提供开源权重版本，便于参赛队伍通过官方 API、第三方平台或本地部署等方式开展测试与复核。各赛道受测模型的具体版本指定如下：
 
-| 赛道 | 模型系列 | 模型名称 (API节点) | 发布时间 ｜ 参数量 ｜ 备注
+|  | 赛道 A（Qwen） | 赛道 B（DeepSeek） |
 | :--- | :--- | :--- |
-| A | Qwen  | Qwen/Qwen3-30B-A3B-Instruct-2507 | 2025-07 ｜ 总参数 30.5B，激活参数 3.3B | 非思考模式。API官网：[https://www.alibabacloud.com/help/en/model-studio/qwen-api-via-dashscope](https://www.alibabacloud.com/help/en/model-studio/qwen-api-via-dashscope)。
-| B | DeepSeek | deepseek-v4-flash | 2026-04 | 总参数 284B，激活参数 13B | 非思考模式（thinking disabled）。API官网：[https://api-docs.deepseek.com/zh-cn/](https://api-docs.deepseek.com/zh-cn/)
+| 模型名称（API Model Name） | `Qwen/Qwen3-30B-A3B-Instruct-2507` | `deepseek-v4-flash` |
+| 发布时间 | 2025-07 | 2026-04 |
+| 参数量 | 总参数 30.5B，激活参数 3.3B | 总参数 284B，激活参数 13B |
+| 调用模式 | 非思考模式 | 非思考模式（thinking disabled） |
+| 官方 API 价格 | 约 ¥0.74 / 1M 输入 tokens，¥2.95 / 1M 输出 tokens | 缓存命中输入 ¥0.02 / 1M tokens；缓存未命中输入 ¥1.00 / 1M tokens；输出 ¥2.00 / 1M tokens |
+| API 官网 | [Alibaba Cloud Model Studio / DashScope](https://www.alibabacloud.com/help/en/model-studio/qwen-api-via-dashscope) | [DeepSeek API Docs](https://api-docs.deepseek.com/zh-cn/) |
 
-选择 Qwen 和 DeepSeek 系列作为测试基线主要基于以下三点考虑：
-1.  它们是目前公认代表中文LLMs最高水平的基础模型，确保了本次评测的有效性和前沿性。
-2.  它们代表了当前大模型演进中两种主流且不同的技术路线，具有较强的样本代表性。
-3.  它们均提供开源权重版本，具备对学术界友好的开源生态和白盒复现潜力。
+> 注：Qwen 官方价格以美元计价，表中人民币价格按 1 USD ≈ 6.84 RMB 粗略折算；DeepSeek 官方价格以人民币计价。API 价格可能随官方平台、部署区域、缓存命中情况或优惠活动变化而调整，实际费用以各官方平台的实时价格为准。
 
-### (2) 提示词与参数配置（暂定）
+> 说明：冲榜阶段，评测系统后台将通过 Alibaba Cloud Model Studio / DashScope 调用 Qwen 模型。为保证测试环境的一致性，建议参赛队伍优先通过相同平台进行 Qwen 赛道的调用测试。参赛队伍也可自行选择其他提供指定模型的第三方 API 平台；具备充足算力资源的队伍亦可尝试本地部署测试。
+
+### (2) 提示词与参数配置
 
 ```text
-根据“文本”的内容，判断“假设”的真值情况：
+根据“text”的内容，判断“hypothesis”的真值情况：
 文本：{text}
 假设：{hypothesis}
 只允许答复T/F/U（对应真/假/无法确定），禁止回复其他解释性内容。
