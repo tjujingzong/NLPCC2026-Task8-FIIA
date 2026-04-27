@@ -36,7 +36,7 @@ Therefore, focusing on the consistency issue, this task adopts a Red Teaming att
 
 # Dataset and Usage Instructions 
 
-The corpus is primarily filtered from relevant Chinese corpora and has been manually annotated and proofread by the evaluation organizers. The evaluation set is expected to contain 1,089 data items, covering approximately 71 Chinese factive predicates. The dataset used for the evaluation is published in JSON format, serving as the basis for text adaptation by participating teams.
+The corpus is primarily filtered from relevant Chinese corpora and has been manually annotated and proofread by the evaluation organizers. The evaluation set contains 1,089 data items, covering approximately 70 Chinese factive predicates. The dataset used for the evaluation is published in JSON format, serving as the basis for text adaptation by participating teams.
 
 Data Example:
 
