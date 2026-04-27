@@ -103,7 +103,7 @@ This evaluation sets up two parallel and independent tracks. Participating teams
 | Parameters | 30.5B total parameters, 3.3B activated parameters | 284B total parameters, 13B activated parameters |
 | Invocation Mode | Non-thinking mode | Non-thinking mode (thinking disabled) |
 | Official API Pricing | Approx. ¥0.74 / 1M input tokens, ¥2.95 / 1M output tokens | Cache-hit input: ¥0.02 / 1M tokens; cache-miss input: ¥1.00 / 1M tokens; output: ¥2.00 / 1M tokens |
-| API Website | [Alibaba Cloud Model Studio / DashScope](https://www.alibabacloud.com/help/en/model-studio/qwen-api-via-dashscope) | [DeepSeek API Docs](https://api-docs.deepseek.com/zh-cn/) |
+| API Website | [Alibaba Cloud Model Studio / DashScope](https://www.alibabacloud.com/help/en/model-studio/qwen-api-via-dashscope) | [DeepSeek API Docs](https://api-docs.deepseek.com/) |
 
 > Note: Qwen’s official pricing is denominated in USD; the RMB prices shown in the table are rough estimates based on 1 USD ≈ 6.84 RMB. DeepSeek’s official pricing is denominated in RMB. API prices may change depending on the official platform, deployment region, cache-hit status, or promotional activities. Actual costs should be based on the real-time prices listed on the respective official platforms.
 
