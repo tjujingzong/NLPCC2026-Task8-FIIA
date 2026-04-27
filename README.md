@@ -131,35 +131,35 @@ In addition, all resources used by the participating teams need to be detailed i
 
 ## Attack Sample Validity Check
 
-To prevent participating teams from inducing unstable model outputs through large-scale rewriting, deletion of core factive information, or disruption of basic syntactic structures, this evaluation implements a validity check for attack samples. All submitted adapted data must pass the following three automated checks before entering the scoring phase. The leaderboard system will calculate scores only for valid sample sets that pass the validity check.
+To prevent participating teams from inducing unstable model outputs through large-scale rewriting, deletion of core factive information, or disruption of basic syntactic structures, this evaluation implements a “validity check” for attack samples. All submitted adapted data must pass the evaluation system’s validity check before entering the scoring phase. The leaderboard system will calculate scores only for valid sample sets that pass the validity check.
 
-### (1) Core Component Retention Check
+The evaluation system will verify submitted samples according to the following rules. If a sample fails the check, the system will return the corresponding rule number (R1–R5) and the reason for invalidation.
 
-The adapted background sentence (`text_attack`) must retain the core factive information from the original data:
+### R1. Basic Fields and ID Validity
 
-1. The adapted sentence must contain the factive predicate (`predicate`) from the original sample. If the predicate is missing from the adapted sentence, or if the predicate field in the submitted data is inconsistent with the original data, the sample will be judged as invalid.
+If a data item is missing any of the four required fields, or if its `id` is invalid or does not exist in the original dataset, the sample will be judged as invalid.
 
-2. The adapted sentence should sufficiently retain the core content of the original clause to be judged (`hypothesis`). The system will calculate the Longest Common Subsequence Coverage (LCS Coverage) between the `hypothesis` and the adapted sentence. If the coverage is lower than 0.7, it indicates that the core content of the clause to be judged is insufficiently retained, and the sample will be judged as invalid.
+### R2. Predicate Integrity
 
-### (2) Text Retention Check
+The adapted sentence (`text_attack`) must contain the factive predicate (`predicate`) from the original sample. If the predicate is missing from the adapted sentence, the sample will be judged as invalid.
 
-To ensure that attack samples mainly introduce limited perturbations based on the original context, rather than rewriting the original sentence on a large scale, the system will calculate the text retention score between the adapted sentence and the original sentence. We use a character-level edit distance algorithm (Levenshtein Ratio) to quantify the degree of text modification, including insertion, deletion, and substitution operations:
+### R3. Clause Integrity
 
-$$Similarity(A,B)=1-\frac{L(A,B)}{\max(|A|,|B|)}$$
+The adapted sentence (`text_attack`) should sufficiently retain the core content of the original clause to be judged (`hypothesis`). The system will calculate the Longest Common Subsequence Coverage (LCS Coverage) between the `hypothesis` and the adapted sentence.
 
-where $A$ denotes the original background sentence, $B$ denotes the adapted background sentence, $L(A,B)$ denotes the character-level Levenshtein edit distance between them, and $|A|$ and $|B|$ denote their character lengths.
+If this score is lower than 0.7, the sample will be judged as invalid.
 
-For example, if the original sentence A, “他知道局面已经不可挽回。” (“He knows that the situation is irreversible.”), is adapted into sentence B, “他不知道局面已经不可挽回。” (“He does not know that the situation is irreversible.”), the only modification is the insertion of one character, “不” (“not”), so the edit distance is $L(A,B)=1$. The length of the original sentence is 12, and the length of the adapted sentence is 13. Therefore:
+### R4. Text Retention
 
-$$Similarity(A,B)=1-\frac{1}{\max(12,13)}=1-\frac{1}{13}\approx0.923$$
+To ensure that attack samples mainly introduce limited perturbations based on the original context, rather than rewriting the original sentence on a large scale, the system will calculate the text retention score between the adapted sentence and the original sentence. We use a character-level edit distance algorithm (Levenshtein Ratio) to quantify the degree of text modification, including insertion, deletion, and substitution operations.
 
-If the text retention score is lower than 0.65, it indicates that the modification is too extensive, and the sample will be judged as invalid.
+If this score is lower than 0.65, it indicates that the modification is too extensive, and the sample will be judged as invalid.
 
-### (3) Semantic Fluency Check
+### R5. Fluency Preservation
 
-The adapted sentence must remain basically natural and coherent in terms of linguistic intuition and grammar. The system will use an automatic fluency scoring method based on language model loss to evaluate the degree of fluency degradation of the adapted sentence relative to the original sentence.
+The adapted sentence must remain basically natural and coherent in terms of linguistic intuition and grammar. The system will use an automatic fluency scoring method based on language model loss to evaluate the degree of fluency degradation of the adapted sentence relative to the original sentence. Specifically, the system uses the open-source Chinese MacBERT model [hfl/chinese-macbert-base](https://huggingface.co/hfl/chinese-macbert-base) to calculate the language model loss of the original background sentence and the adapted background sentence, respectively. If the loss of the adapted sentence increases significantly compared with that of the original sentence, it suggests that the adaptation may have introduced unnatural expressions, structural disruption, or abnormal characters. The system will calculate a fluency score according to the degree of loss degradation. The score ranges from [0, 1].
 
-Specifically, the system uses the open-source Chinese MacBERT model [hfl/chinese-macbert-base](https://huggingface.co/hfl/chinese-macbert-base) to calculate the language model loss of the original background sentence and the adapted background sentence, respectively. If the loss of the adapted sentence increases significantly compared with that of the original sentence, it suggests that the adaptation may have introduced unnatural expressions, structural disruption, or abnormal characters. The system will calculate a fluency score according to the degree of loss degradation. The score ranges from [0, 1]. Samples with a score lower than 0.6 will be judged as invalid.
+If this score is lower than 0.6, the sample will be judged as invalid.
 
 ### Self-Check Script and Program
 
