@@ -36,7 +36,7 @@ Therefore, focusing on the consistency issue, this task adopts a Red Teaming att
 
 # Dataset and Usage Instructions 
 
-The corpus is primarily filtered from relevant Chinese corpora and has been manually annotated and proofread by the evaluation organizers. The evaluation set is expected to contain 1,000 data items, covering approximately 300 Chinese factive predicates. The dataset used for the evaluation is published in JSON format, serving as the basis for text adaptation by participating teams.
+The corpus is primarily filtered from relevant Chinese corpora and has been manually annotated and proofread by the evaluation organizers. The evaluation set is expected to contain 1,089 data items, covering approximately 71 Chinese factive predicates. The dataset used for the evaluation is published in JSON format, serving as the basis for text adaptation by participating teams.
 
 Data Example:
 
@@ -84,20 +84,24 @@ To ensure compliance, we will implement a "Sample Validity Admission" check duri
 
 Participating teams are required to conduct independent Multi-turn Prompting to the models via API. They must ask the model to judge the truth value of the `hypothesis` field based on the value of the `text` field, record the model's return results (T/F/U), and self-check its self-consistency rate. The selection range of models, prompt templates, and other evaluation-related environmental parameters are uniformly specified by the task organizers.
 
-### (1) Optional Model Range (Updating)
-To comprehensively and fairly evaluate the effectiveness of the attack strategies, this evaluation sets up two parallel independent tracks. The specific versions of the tested models for each track are uniquely designated by the organizers:
+### (1) Available Tracks and Model Scope
 
-| Model Series | Track Name | Specific Model (API Node) |
+This evaluation sets up two parallel and independent tracks. Participating teams may choose either the Qwen or DeepSeek model series as the attack target. Both are representative foundation models among current Chinese large language models, which helps ensure the validity and frontier relevance of this evaluation. Meanwhile, their API costs are relatively manageable, and both provide open-weight versions, enabling participating teams to conduct testing and verification through official APIs, third-party platforms, or local deployment. The specific model versions designated for each track are as follows:
+
+|  | Track A (Qwen) | Track B (DeepSeek) |
 | :--- | :--- | :--- |
-| Qwen | Track A | Qwen2.5-72B-Instruct |
-| DeepSeek | Track B | DeepSeek-V3 |
+| Model Name (API Model Name) | `Qwen/Qwen3-30B-A3B-Instruct-2507` | `deepseek-v4-flash` |
+| Release Date | 2025-07 | 2026-04 |
+| Parameters | 30.5B total parameters, 3.3B activated parameters | 284B total parameters, 13B activated parameters |
+| Invocation Mode | Non-thinking mode | Non-thinking mode (thinking disabled) |
+| Official API Pricing | Approx. ¥0.74 / 1M input tokens, ¥2.95 / 1M output tokens | Cache-hit input: ¥0.02 / 1M tokens; cache-miss input: ¥1.00 / 1M tokens; output: ¥2.00 / 1M tokens |
+| API Website | [Alibaba Cloud Model Studio / DashScope](https://www.alibabacloud.com/help/en/model-studio/qwen-api-via-dashscope) | [DeepSeek API Docs](https://api-docs.deepseek.com/zh-cn/) |
 
-Selecting the Qwen and DeepSeek series as test baselines is primarily based on three considerations:
-1.  They are currently recognized as foundation models representing the highest level of Chinese LLMs, ensuring the effectiveness and cutting-edge nature of this evaluation.
-2.  They represent two mainstream and distinctly different technological routes in the current evolution of large models, possessing strong sample representativeness.
-3.  They both provide open-source weight versions, offering an academically friendly open-source ecosystem and white-box replication potential.
+> Note: Qwen’s official pricing is denominated in USD; the RMB prices shown in the table are rough estimates based on 1 USD ≈ 6.84 RMB. DeepSeek’s official pricing is denominated in RMB. API prices may change depending on the official platform, deployment region, cache-hit status, or promotional activities. Actual costs should be based on the real-time prices listed on the respective official platforms.
 
-### (2) Prompt Template & Parameter Configuration (Updating)
+> Clarification: During the leaderboard competition stage, the evaluation system backend will call the models through the two official API websites listed above. Therefore, to ensure consistency of the testing environment, participating teams are encouraged to use the same platforms for model invocation and testing. Participating teams may also choose other third-party API platforms that provide the designated models; teams with sufficient computing resources may also attempt local deployment for testing.
+
+### (2) Prompt Template & Parameter Configuration
 ```text
 根据“文本”的内容，判断“假设”的真值情况：
 文本：{text}
