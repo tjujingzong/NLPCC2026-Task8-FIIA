@@ -104,7 +104,7 @@
 | 参数量 | 总参数 30.5B，激活参数 3.3B | 总参数 284B，激活参数 13B |
 | 调用模式 | 非思考模式 | 非思考模式（thinking disabled） |
 | 官方 API 价格 | 约 ¥0.74 / 1M 输入 tokens，¥2.95 / 1M 输出 tokens | 缓存命中输入 ¥0.02 / 1M tokens；缓存未命中输入 ¥1.00 / 1M tokens；输出 ¥2.00 / 1M tokens |
-| API 官网 | [Alibaba Cloud Model Studio / DashScope](https://www.alibabacloud.com/help/en/model-studio/qwen-api-via-dashscope) | [DeepSeek API Docs](https://api-docs.deepseek.com/zh-cn/) |
+| API 官网 | [Alibaba Cloud Model Studio / DashScope](https://www.alibabacloud.com/help/zh/model-studio/qwen-api-via-dashscope) | [DeepSeek API Docs](https://api-docs.deepseek.com/zh-cn/) |
 
 > 注：Qwen 官方价格以美元计价，表中人民币价格按 1 USD ≈ 6.84 RMB 粗略折算；DeepSeek 官方价格以人民币计价。API 价格可能随官方平台、部署区域、缓存命中情况或优惠活动变化而调整，实际费用以各官方平台的实时价格为准。
 
