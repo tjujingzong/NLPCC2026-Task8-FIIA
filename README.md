@@ -175,13 +175,11 @@ If this score is lower than 0.6, the sample will be judged as invalid.
 
 ### Script and Program for Self-Check
 
-The algorithmic implementations of the above validity check rules have been released in the `validate` directory of this repository. Participating teams are encouraged to use the self-check script (`validate.py`) during the data adaptation process to conduct basic format checks and validity checks on their samples, so as to minimize submission errors or invalid samples caused by validity issues.
-
-During the later leaderboard competition stage, the validity determination program used by the evaluation system backend will remain fully consistent with the publicly released self-check program.
+The algorithmic implementations of the above validity check rules have been released in the `validate` directory of this repository. During the later leaderboard competition stage, the validity determination program used by the evaluation system backend will remain fully consistent with the publicly released self-check program.
 
 At present, the self-check script needs to be downloaded locally by participating teams and run through a Python interpreter. To lower the usage barrier, the organizers are developing a simple graphical user interface program to help participating teams validate their data more conveniently. The graphical program is expected to be released within one week, and the organizers will notify all participating teams by email at that time.
 
-If there are any questions regarding the validity check, participating teams are welcome to contact the organizers by email.
+Participating teams are encouraged to use the self-check program during the data adaptation process to conduct basic format checks and validity checks on their samples, so as to minimize submission errors or invalid samples caused by validity issues. If there are any questions regarding the validity check, please feel free to contact the organizers.
 
 
 # Evaluation Metric (Updating)
