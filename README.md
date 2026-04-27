@@ -143,9 +143,9 @@ If a data item is missing any of the four required fields, or if its `id` is inv
 
 The adapted sentence (`text_attack`) must contain the factive predicate (`predicate`) from the original sample. If the predicate is missing from the adapted sentence, the sample will be judged as invalid.
 
-### R3. Clause Integrity
+### R3. Hypothesis Integrity
 
-The adapted sentence (`text_attack`) should sufficiently retain the core content of the original clause to be judged (`hypothesis`). The system will calculate the Longest Common Subsequence Coverage (LCS Coverage) between the `hypothesis` and the adapted sentence.
+The adapted sentence (`text_attack`) should sufficiently retain the core content of the original hypothesis to be judged (`hypothesis`). The system will calculate the Longest Common Subsequence Coverage (LCS Coverage) between the `hypothesis` and the adapted sentence.
 
 If this score is lower than 0.7, the sample will be judged as invalid.
 
