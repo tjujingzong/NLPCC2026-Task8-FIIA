@@ -14,8 +14,8 @@
 
 ### 2026-04-27
 1. The official dataset has been released in the `dataset` directory.
-2. The information on the tested models has been updated.
-3. The attack sample validity check rules have been updated. The corresponding self-check script has been released in the `validate` directory.
+2. The information on the [tested models](##-Evaluation-Operations-and-Specifications) has been updated.
+3. The [attack sample validity check rules](##-Attack-Sample-Validity-Check) have been updated. The corresponding self-check script has been released in the `validate` directory.
 4. Additional note: API costs incurred during the preliminary exploration and testing stage shall be borne by participating teams themselves. The evaluation system backend and leaderboard URL will become available during the leaderboard competition stage (June 11–June 20). Participating teams will be notified by email before the system opens.
 
 
@@ -112,10 +112,12 @@ This evaluation sets up two parallel and independent tracks. Participating teams
 ### (2) Prompt Template & Parameter Configuration
 ```text
 根据“文本”的内容，判断“假设”的真值情况：
-文本：{text}
+文本：{text_original/text_attack}
 假设：{hypothesis}
 只允许答复T/F/U（对应真/假/无法确定），禁止回复其他解释性内容。
 ```
+
+Participating teams should fill the relevant fields of each item into this template and call the large language model to obtain the output. Each item should be tested repeatedly for 10 rounds.
 
 To restore the ecological validity of large models in practical applications, parameters such as Temperature are set to the official recommended or default values for each model series. Participating teams are not allowed to modify them.
 
@@ -133,7 +135,7 @@ Participating teams must organize the adapted items to be submitted into a JSON 
 ]
 ```
 
-The response_original and response_attack fields serve only as a reference. After the team submits the attack set, the system backend will call the model based on text_attack to obtain the real output for calculating the actual score.
+The `response_original` and `response_attack` fields should contain all answers obtained by the participating team from the 10 repeated calls for the corresponding item. These fields are required for reference. After the team submits the attack set, the system backend will call the model based on text_attack to obtain the real output for calculating the actual score.
 
 Participating teams do not need to perform attack operations on all items in the test set. They only need to submit the items that have actually been adapted. The maximum number of items counted towards the score is 200. Therefore, each team should test, filter, and sort the adapted data themselves, and submit the top 200 items with the best self-tested attack effects.
 
