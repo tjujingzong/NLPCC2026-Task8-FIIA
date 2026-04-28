@@ -14,7 +14,7 @@
 
 ### 2026-04-27
 1. The official dataset has been released in the `dataset` directory.
-2. The information on the [Available Tracks and Model Scope](#evaluation-operations-and-specifications) has been updated.
+2. The [Available Tracks and Model Scope](#evaluation-operations-and-specifications) has been updated.
 3. The [Attack Sample Validity Check](#attack-sample-validity-check) rules have been updated. The corresponding self-check script has been released in the `validate` directory.
 4. Additional note: API costs incurred during the preliminary exploration and testing stage shall be borne by participating teams themselves. The evaluation system backend and leaderboard URL will become available during the leaderboard competition stage (June 11–June 20). Participating teams will be notified by email before the system opens.
 
