@@ -115,7 +115,7 @@ This evaluation sets up two parallel and independent tracks. Participating teams
 
 |  | Track A (Qwen) | Track B (DeepSeek) |
 | :--- | :--- | :--- |
-| Model Name | `Qwen/Qwen3-30B-A3B-Instruct-2507` | `deepseek-v4-flash` |
+| Model Name | `qwen3-30b-a3b-instruct-2507` | `deepseek-v4-flash` |
 | Release Date | 2025-07 | 2026-04 |
 | Parameters | 30.5B total parameters, 3.3B activated parameters | 284B total parameters, 13B activated parameters |
 | Invocation Mode | Non-thinking mode | Non-thinking mode (thinking disabled) |
