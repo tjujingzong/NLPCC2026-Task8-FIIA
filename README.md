@@ -16,7 +16,6 @@
 1. The official dataset has been released in the `dataset` directory.
 2. The [Available Tracks and Model Scope](#evaluation-operations-and-specifications) has been updated.
 3. The [Attack Sample Validity Check](#attack-sample-validity-check) rules have been updated. The corresponding self-check script has been released in the `validate` directory.
-4. Additional note: API costs incurred during the preliminary exploration and testing stage shall be borne by participating teams themselves. The evaluation system backend and leaderboard URL will become available during the leaderboard competition stage (June 11–June 20). Participating teams will be notified by email before the system opens.
 
 
 ## Q&A (Continuously Updated)
@@ -32,6 +31,9 @@ A: The two large language models specified in this task, Qwen and DeepSeek, serv
 
 **Q4: Can I use large language models or other AI tools to help generate attack samples?**  
 A: Yes. The organizing team does not impose restrictions on how attack texts are generated. Participating teams may generate candidate attack samples through manual rewriting, rule-based programs, large language model assistance, or other methods. The specified target models for this task may also be used for this purpose. However, the final submitted samples must still satisfy the format requirements and validity-checking rules specified in the task instructions.
+
+**Q5: If I want to test the attack effect of my adapted texts on the specified large language models during the preparation stage, who is responsible for the resulting API costs?**  
+A: API costs incurred during the preliminary exploration and testing stage shall be borne by the participating teams themselves. During the leaderboard competition stage (June 11–June 20), the evaluation system backend and leaderboard will be opened. At that time, teams may submit their attack datasets to the backend and obtain evaluation scores. The API costs incurred during this stage will be covered by the organizing team.
 
 
 # Registration
