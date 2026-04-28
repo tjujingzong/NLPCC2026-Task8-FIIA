@@ -19,6 +19,21 @@
 4. Additional note: API costs incurred during the preliminary exploration and testing stage shall be borne by participating teams themselves. The evaluation system backend and leaderboard URL will become available during the leaderboard competition stage (June 11–June 20). Participating teams will be notified by email before the system opens.
 
 
+## Q&A (Continuously Updated)
+
+**Q1: Is the released dataset the official dataset to be used during the leaderboard competition stage, or is it only for practice?**  
+A: The released dataset, which contains 1,089 data items, is the only official dataset for this task. It is not a practice set. No additional test set will be released during the leaderboard competition stage; only the evaluation system backend and leaderboard entry will be opened at that time. At the current stage, participating teams may already use the official dataset to select samples, adapt texts, conduct self-testing, and rank their candidate samples.
+
+**Q2: Do I need to adapt all 1,089 data items?**  
+A: No. Participating teams may freely select samples from the 1,089 official data items for adaptation and submit the samples that show better attack performance in self-testing. At most 200 samples will be counted toward the final score. If a submission file contains more than 200 samples, the system will only evaluate the first 200 samples in the submitted file. Therefore, teams are advised to complete sample filtering and ordering before submission.
+
+**Q3: What role do the two large language models specified in this task play?**  
+A: The two large language models specified in this task, Qwen and DeepSeek, serve as the “target models to be attacked.” Specifically, participating teams need to construct `text_attack` and call the specified model using the unified prompt provided in the task instructions, so that the model outputs a T/F/U answer for the given `hypothesis`. Each item should be queried 10 times, and the results of these 10 responses should be recorded. The greater the internal divergence among the 10 responses, the higher the score.
+
+**Q4: Can I use large language models or other AI tools to help generate attack samples?**  
+A: Yes. The organizing team does not impose restrictions on how attack texts are generated. Participating teams may generate candidate attack samples through manual rewriting, rule-based programs, large language model assistance, or other methods. The specified target models for this task may also be used for this purpose. However, the final submitted samples must still satisfy the format requirements and validity-checking rules specified in the task instructions.
+
+
 # Registration
 
 Participants may register through either of the following channels:
