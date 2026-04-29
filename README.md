@@ -28,7 +28,7 @@
 A: The released dataset, which contains 1,089 data items, is the only official dataset for this task. It is not a practice set. No additional test set will be released during the leaderboard competition stage; only the evaluation system backend and leaderboard entry will be opened at that time. At the current stage, participating teams may already use the official dataset to select samples, adapt texts, conduct self-testing, and rank their candidate samples.
 
 **Q2: Do I need to adapt all 1,089 data items?**  
-A: No. Participating teams may freely select samples from the 1,089 official data items for adaptation and submit the samples that show better attack performance in self-testing. At most 200 samples will be counted toward the final score. If a submission file contains more than 200 samples, the system will only evaluate the first 200 samples in the submitted file. Therefore, teams are advised to complete sample filtering and ordering before submission.
+A: No. Participating teams may freely select items from the dataset for adaptation and only submit the samples that show better attack performance in self-testing. At most 200 samples will be counted toward the final score.
 
 **Q3: What role do the two large language models specified in this task play?**  
 A: The two large language models specified in this task, Qwen and DeepSeek, serve as the “target models to be attacked.” Specifically, participating teams need to construct `text_attack` and call the specified model using the unified prompt provided in the task instructions, so that the model outputs a T/F/U answer for the given `hypothesis`. Each item should be queried 10 times, and the results of these 10 responses should be recorded.
@@ -162,7 +162,9 @@ Participating teams must organize the adapted items to be submitted into a JSON 
 ]
 ```
 
-Participating teams do not need to perform attack operations on all items in the test set. They only need to submit the items that have actually been adapted. The maximum number of items counted towards the score is 200. Therefore, each team should test, filter, and sort the adapted data themselves, and submit the top 200 items with the best self-tested attack effects. For example, if a team actually adapted 326 items and submitted all 326 items to the system as an attack sample set, the system will only calculate the inconsistency rate score of the top 200 items in the set as the final result.
+Participating teams do not need to perform attack operations on all items in the test set. They only need to submit the items that have actually been adapted. The maximum number of items counted towards the score is 200. Therefore, each team should test, filter, and sort the adapted data themselves, and submit the top 200 items with the best self-tested attack effects. 
+
+> If a team actually adapted more than 200 items and submitted all items to the system as an attack sample set, the system will only calculate the inconsistency rate score of the top 200 items in the set as the final result.
 
 In addition, all resources used by the participating teams need to be detailed in the final submitted technical report. All code and results from the experiments must be properly saved for future reference.
 
