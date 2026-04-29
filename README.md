@@ -216,29 +216,41 @@ At present, the self-check script needs to be downloaded locally by participatin
 Participating teams are encouraged to use the self-check program during the data adaptation process to conduct basic format checks and validity checks on their samples, so as to minimize submission errors or invalid samples caused by validity issues.
 
 
-# Evaluation Metric (Updating)
+## Evaluation Metric
 
-Since the evaluation mode is a red teaming attack, this task evaluates performance by measuring the "attack success rate" (Weighted-MIS). The overall calculation process is divided into the following two steps.
+This task uses the **Consistency Attack Score (AttackScore)** as the final ranking criterion. A higher AttackScore indicates a stronger attack effect. The maximum possible score is 120. The metric is calculated in the following three steps.
 
-## Multi-turn Inconsistency Score (MIS)
+### Multi-turn Inconsistency Rate (MIR) for a Single Item
 
-This metric is the basic scoring module, used to calculate the degree of answer dispersion for a single item and a specific set. The calculation formula is:
+For each attack sample that passes the validity check, the evaluation backend will perform 10 model calls on both the original sentence (`text_original`) and the attack sentence (`text_attack`). For each item, its Multi-turn Inconsistency Rate (MIR) is defined as follows:
 
-$$MIS=\frac{1}{N}\sum_{i=1}^{N}(1-\frac{\max(c_i)}{k_i})$$ 
+$$
+MIR = 1 - \frac{\max(c_T, c_F, c_U)}{10}
+$$
 
-Where $N$ is the total number of valid attack items submitted by the participating team, $k_i$ is the total number of questioning (or attack) rounds initiated for the $i$-th item (usually a fixed value $K$, such as 10 rounds), and $\max(c_i)$ is the count of the most frequent answer (T/F/U) among the $k_i$ rounds of replies for the $i$-th item.
+where $c_T$, $c_F$, and $c_U$ denote the number of times the model outputs `T`, `F`, and `U` respectively across the 10 calls. For example, suppose the 10 outputs for one item are `T,T,T,T,T,T,F,F,F,U`. The most frequent answer is `T`, which appears 6 times. Therefore, the MIR of this item is $MIR = 1 - \frac{6}{10} = 0.4$. The more dispersed the model's answers are across multiple calls, the higher the MIR. In this task, the theoretical range of MIR is: $MIR \in [0, 0.6]$.
 
-Assuming a total of 10 calls are made for a certain item, and the model's reply distribution is 6 T's, 3 F's, and 1 U. Then the count of the highest frequency answer $\max(c_i) = 6$, so the self-consistency rate of the item is 0.6, and its inconsistency rate is 0.4. A higher MIS score indicates that the submitted attack samples trigger a higher inconsistency rate, meaning the attack is more successful.
+### Attack Score for a Single Item ($Score_i$)
 
-## Multi-class Weighted Score (Weighted-MIS)
+Based on MIR, the attack score of a single item is defined as the increase in the **attack sentence MIR ($MIR_{attack}$)** over the **original sentence MIR ($MIR_{orig}$)**:
 
-Factivity inference capabilities show significant differences across different types of verbs (such as cognitive verbs, speech verbs, evaluative verbs, etc.). To prevent participating teams from stacking data and overfitting scores on a few highly vulnerable words (such as "抱怨" / complain), we further introduce a weighting mechanism based on the classification of factive verbs. This rewards participating teams for designing attack strategies that cover as many verb types as possible and possess broad linguistic generalization capabilities.
+$$
+Score_i = \max(MIR_{attack} - MIR_{orig}, 0)
+$$
 
-The evaluation backend will calculate the MIS score for each category separately based on the verb classification table provided by the organizers, and then perform an equal-weight macro-average summation across all categories:
+This means that an item receives a positive score only when the attack sentence induces higher inconsistency than the original sentence. If the attack sentence does not increase the inconsistency of the model's responses, the score of this item is 0. The theoretical range of $Score_i$ is: $Score_i \in [0, 0.6]$.
 
-$$Weighted\_MIS=\frac{1}{F}\sum_{j=1}^{F}MIS_j$$
+### Overall Attack Score (AttackScore)
 
-Where $F$ is the number of verb categories, and $MIS_j$ is the score of valid submitted samples under the $j$-th category of words. The final ranking basis is the Weighted-MIS.
+The final attack score is the sum of the attack scores of all valid samples. For each team in each track, at most the first 200 valid attack samples in the submitted file will be counted:
+
+$$
+AttackScore = \sum_i Score_i
+$$
+
+Since the maximum score for a single item is 0.6 and at most 200 valid attack samples are counted, the theoretical range of AttackScore is: $AttackScore \in [0, 120]$.
+
+> Note: Each original sample `id` may correspond to only one submitted attack sample. If a team submits multiple attack samples for the same `id` in the same submission file, only the first occurrence will be retained for scoring, and the duplicate samples will not be counted in the final score.
 
 
 # Tentative Schedule
