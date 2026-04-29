@@ -31,7 +31,7 @@ A: The released dataset, which contains 1,089 data items, is the only official d
 A: No. Participating teams may freely select samples from the 1,089 official data items for adaptation and submit the samples that show better attack performance in self-testing. At most 200 samples will be counted toward the final score. If a submission file contains more than 200 samples, the system will only evaluate the first 200 samples in the submitted file. Therefore, teams are advised to complete sample filtering and ordering before submission.
 
 **Q3: What role do the two large language models specified in this task play?**  
-A: The two large language models specified in this task, Qwen and DeepSeek, serve as the “target models to be attacked.” Specifically, participating teams need to construct `text_attack` and call the specified model using the unified prompt provided in the task instructions, so that the model outputs a T/F/U answer for the given `hypothesis`. Each item should be queried 10 times, and the results of these 10 responses should be recorded. The greater the internal divergence among the 10 responses, the higher the score.
+A: The two large language models specified in this task, Qwen and DeepSeek, serve as the “target models to be attacked.” Specifically, participating teams need to construct `text_attack` and call the specified model using the unified prompt provided in the task instructions, so that the model outputs a T/F/U answer for the given `hypothesis`. Each item should be queried 10 times, and the results of these 10 responses should be recorded.
 
 **Q4: Can I use large language models or other AI tools to help generate attack samples?**  
 A: Yes. The organizing team does not impose restrictions on how attack texts are generated. Participating teams may generate candidate attack samples through manual rewriting, rule-based programs, large language model assistance, or other methods. The specified target models for this task may also be used for this purpose. However, the final submitted samples must still satisfy the format requirements and validity-checking rules specified in the task instructions.
@@ -41,17 +41,13 @@ A: API costs incurred during the preliminary exploration and testing stage shall
 
 **Q6: What kind of adapted sentence counts as a successful attack?**
 
-A: This task focuses on the **collapse of internal consistency** in large language models during factivity inference, rather than whether the answer is flipped relative to the original sentence. This can be illustrated with the following example:
+A: In short, the modified sentence we expect should make the model's inference results **more inconsistent**. That is, we only care about changes in the consistency rate, not about what the specific answer is. Consider the following example: suppose we select sentence A from the dataset as the original sentence and modify it into two versions, A1 and A2.
 
-Suppose we choose DeepSeek as the target model. We adapt an original sentence A from the dataset into two modified sentences, A1 and A2.
+- The model's 10 judgments on the original sentence A are: `T,T,T,T,T,T,T,T,T,T`
+- The model's 10 judgments on the modified sentence A1 are: `U,U,U,U,U,U,U,U,U,U`
+- The model's 10 judgments on the modified sentence A2 are: `T,U,T,U,T,U,T,U,T,U`
 
-- DeepSeek's 10 judgments on the original sentence A are: `T,T,T,T,T,T,T,T,T,T`
-- DeepSeek's 10 judgments on the modified sentence A1 are: `U,U,U,U,U,U,U,U,U,U`
-- DeepSeek's 10 judgments on the modified sentence A2 are: `T,U,T,U,T,U,T,U,T,U`
-
-For modified sentence A1, although the model's judgment changes, its consistency rate is the same as that of the original sentence A, namely 100%. The model remains logically self-consistent. Therefore, sentence A1 is an **invalid modification**.
-
-For modified sentence A2, the consistency rate is only 50%. The model's judgment is no longer stable, meaning that different answers may be obtained across repeated queries. Therefore, sentence A2 is a **valid modification that aligns with the objective of this task**.
+For modified sentence A1, although the model's judgment changes, its consistency rate is the same as that of the original sentence A, namely 100%. The model remains logically self-consistent. Therefore, sentence A1 is an **invalid modification**. For modified sentence A2, the consistency rate is only 50%. The model's judgments are no longer stable, meaning that different answers may be obtained across repeated queries. Therefore, sentence A2 is a **valid modification that aligns with the objective of this task**.
 
 
 # Registration
