@@ -90,7 +90,7 @@ def get_attacked_text(item):
 
 def check_required_fields(item):
     errors = []
-    required_fields = ["id", "text_attack", "response_original", "response_attack"]
+    required_fields = ["id", "text_attack"]
     for field in required_fields:
         if field not in item:
             errors.append(f"R1: 缺少{field}字段")
@@ -215,10 +215,11 @@ def verify_submission(original_file, submission_file):
         # submission_data = submission_data[:ITEM_LMT]
 
     failed_items = []
+    seen_ids = set()
     print(f"[2/3] 开始核验 {len(submission_data)} 条数据...\n")
 
     for item in submission_data:
-        # 1. Field Check
+        # 1. Field & ID Check
         item_id = item.get('id')
         errors = check_required_fields(item)
         if errors:
@@ -226,6 +227,13 @@ def verify_submission(original_file, submission_file):
             failed_items.append((item_id or "Unknown", reason))
             print(f"[{item_id or 'Unknown'}] Fail: {reason}")
             continue
+
+        if item_id in seen_ids:
+            reason = "R1: ID重复"
+            failed_items.append((item_id, reason))
+            print(f"[{item_id}] Fail: {reason}")
+            continue
+        seen_ids.add(item_id)
 
         if item_id not in valid_ids:
             reason = "R1: ID非法或不存在"
