@@ -35,6 +35,23 @@ A: Yes. The organizing team does not impose restrictions on how attack texts are
 **Q5: If I want to test the attack effect of my adapted texts on the specified large language models during the preparation stage, who is responsible for the resulting API costs?**  
 A: API costs incurred during the preliminary exploration and testing stage shall be borne by the participating teams themselves. During the leaderboard competition stage (June 11–June 20), the evaluation system backend and leaderboard will be opened. At that time, teams may submit their attack datasets to the backend and obtain evaluation scores. The API costs incurred during this stage will be covered by the organizing team.
 
+**Q6: What kind of adapted sentence counts as a successful attack?**
+
+A: This task focuses on the **collapse of internal consistency** in large language models during factivity inference, rather than on whether the answer changes compared with the original sentence. Consider the following example:
+
+Suppose we choose DeepSeek as the target model.
+
+- DeepSeek’s 10 judgments on the original sentence A in the dataset are: `T/T/T/T/T/T/T/T/T/T`
+
+Based on A, we create two adapted sentences, A1 and A2.
+
+- DeepSeek’s 10 judgments on adapted sentence A1 are: `U/U/U/U/U/U/U/U/U/U`
+- DeepSeek’s 10 judgments on adapted sentence A2 are: `T/U/T/U/T/U/T/U/T/U`
+
+For sample A1, although the model’s judgment changes, the consistency rate is still 100%. The model remains logically self-consistent. Therefore, sentence A1 is an **invalid adapted sample**.
+
+For sample A2, however, the consistency rate is only 50%. The model’s judgment is no longer stable, meaning that repeated queries may produce different answers. This indicates that the model has fallen into a logical inconsistency. Therefore, sentence A2 is a **highly successful attack sample**.
+
 
 # Registration
 
