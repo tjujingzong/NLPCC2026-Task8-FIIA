@@ -230,24 +230,24 @@ $$
 
 简而言之，FinalScore越高，表示攻击效果越佳，也即最终排名依据。
 
-## Multi-turn Inconsistency Score (MIS)AttackScore计算方法
+## AttackScore计算方法
 
 对于每条通过有效性检查的攻击样本，评测后台会分别对原句和攻击句进行 $K=10$ 轮模型调用。对于某一条样本，可以得到其不一致率（Multi-turn Inconsistency Score, MIS）定义为：
-$$
-MIS = 1 - \frac{\max(c_T, c_F, c_U)}{10}
-$$
+
+$$ MIS = 1 - \frac{\max(c_T, c_F, c_U)}{10} $$
+
 其中，$c_T$、$c_F$、$c_U$ 分别表示 10 轮调用中模型输出 `T`、`F`、`U` 的次数。例如，假设某样本的10轮调用结果为`T,T,T,T,T, T,F,F,F,U`，则该样本的不一致率为$MIS = 1 - \frac{6}{10} = 0.4$。MIS 越高，说明模型在多轮回答中的分歧越大，一致性越低。在本任务中，单条样本的 MIS 的理论范围为：$MIS \in [0, 0.6]$。
 
 在此基础上，单条样本的攻击得分定义为攻击句相对于原句的不一致率增量：
-$$
-Score_i = \max(MIS_{attack} - MIS_{orig}, 0)
-$$
+
+$$ Score_i = \max(MIS_{attack} - MIS_{orig}, 0) $$
+
 这意味着：只有当攻击句比原句引发了更高的不一致性时，该样本才会获得正分；如果攻击句没有提升模型回答的不一致性，则该样本得分为 0。单条样本攻击得分的理论范围为：$Score_i \in [0, 0.6]$。
 
 最终的攻击得分即为所有样本攻击得分的累加：
-$$
-AttackScore = \sum_i Score_i
-$$
+
+$$ AttackScore = \sum_i Score_i $$
+
 其中，$Score_i$ 表示第 $i$ 条有效攻击样本的单条得分。由于至多计入200条样本的攻击得分，因此 AttackScore 的理论范围是 $AttackScore \in [0, 120]$。
 
 ## Multi-class Weighted Score (Weighted-MIS)
