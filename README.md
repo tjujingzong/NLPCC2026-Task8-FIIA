@@ -14,7 +14,7 @@
 
 ### 2026-04-29
 1. The [Evaluation Metric](#evaluation-metric) has been updated.
-2. The [Submission Requirements](#submission-requirements) have been simplified: the final submission format no longer requires the `response_original` and `response_attack` fields.
+2. The [Submission Requirements](#submission-requirements) have been simplified: the final submission format no longer requires the `response_original` and `response_attack` fields. `validate.py` has also been updated accordingly.
 
 ### 2026-04-27
 1. The official dataset has been released in the `dataset` directory.
