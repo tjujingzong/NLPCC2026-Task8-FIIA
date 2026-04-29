@@ -10,7 +10,7 @@
 
 # NLPCC2026-Task8: Factivity Inference Inconsistency Attack (FIIA)
 
-## Updates
+## 📢 Updates
 
 ### 2026-04-29
 1. The [Evaluation Metric](#evaluation-metric) has been updated.
@@ -22,7 +22,7 @@
 3. The [Attack Sample Validity Check](#attack-sample-validity-check) rules have been updated. The corresponding self-check script has been released in the `validate` directory.
 
 
-## Q&A (Continuously Updated)
+## ❓ Q&A (Continuously Updated)
 
 **Q1: Is the released dataset the official dataset to be used during the leaderboard competition stage, or is it only for practice?**  
 A: The released dataset, which contains 1,089 data items, is the only official dataset for this task. It is not a practice set. No additional test set will be released during the leaderboard competition stage; only the evaluation system backend and leaderboard entry will be opened at that time. At the current stage, participating teams may already use the official dataset to select samples, adapt texts, conduct self-testing, and rank their candidate samples.
@@ -178,7 +178,7 @@ The evaluation system will verify submitted samples according to the following r
 
 ### R1. Basic Fields and ID Validity
 
-If a data item is missing any of the four required fields, or if its `id` is invalid or does not exist in the original dataset, the sample will be judged as invalid.
+If a data item is missing any required field, if its `id` is invalid or does not exist in the original dataset, or if duplicate `id`s are found in the submission file, the sample will be judged as invalid.
 
 ### R2. Predicate Integrity
 
