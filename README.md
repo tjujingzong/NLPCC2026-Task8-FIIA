@@ -12,6 +12,10 @@
 
 ## Updates
 
+### 2026-04-29
+1. The [Evaluation Metric](#evaluation-metric) has been updated.
+2. The [Submission Requirements](#submission-requirements) have been simplified: the final submission format no longer requires the `response_original` and `response_attack` fields.
+
 ### 2026-04-27
 1. The official dataset has been released in the `dataset` directory.
 2. The [Available Tracks and Model Scope](#evaluation-operations-and-specifications) has been updated.
@@ -37,20 +41,17 @@ A: API costs incurred during the preliminary exploration and testing stage shall
 
 **Q6: What kind of adapted sentence counts as a successful attack?**
 
-A: This task focuses on the **collapse of internal consistency** in large language models during factivity inference, rather than on whether the answer changes compared with the original sentence. Consider the following example:
+A: This task focuses on the **collapse of internal consistency** in large language models during factivity inference, rather than whether the answer is flipped relative to the original sentence. This can be illustrated with the following example:
 
-Suppose we choose DeepSeek as the target model.
+Suppose we choose DeepSeek as the target model. We adapt an original sentence A from the dataset into two modified sentences, A1 and A2.
 
-- DeepSeek’s 10 judgments on the original sentence A in the dataset are: `T/T/T/T/T/T/T/T/T/T`
+- DeepSeek's 10 judgments on the original sentence A are: `T,T,T,T,T,T,T,T,T,T`
+- DeepSeek's 10 judgments on the modified sentence A1 are: `U,U,U,U,U,U,U,U,U,U`
+- DeepSeek's 10 judgments on the modified sentence A2 are: `T,U,T,U,T,U,T,U,T,U`
 
-Based on A, we create two adapted sentences, A1 and A2.
+For modified sentence A1, although the model's judgment changes, its consistency rate is the same as that of the original sentence A, namely 100%. The model remains logically self-consistent. Therefore, sentence A1 is an **invalid modification**.
 
-- DeepSeek’s 10 judgments on adapted sentence A1 are: `U/U/U/U/U/U/U/U/U/U`
-- DeepSeek’s 10 judgments on adapted sentence A2 are: `T/U/T/U/T/U/T/U/T/U`
-
-For sample A1, although the model’s judgment changes, the consistency rate is still 100%. The model remains logically self-consistent. Therefore, sentence A1 is an **invalid adapted sample**.
-
-For sample A2, however, the consistency rate is only 50%. The model’s judgment is no longer stable, meaning that repeated queries may produce different answers. This indicates that the model has fallen into a logical inconsistency. Therefore, sentence A2 is a **highly successful attack sample**.
+For modified sentence A2, the consistency rate is only 50%. The model's judgment is no longer stable, meaning that different answers may be obtained across repeated queries. Therefore, sentence A2 is a **valid modification that aligns with the objective of this task**.
 
 
 # Registration
@@ -154,24 +155,18 @@ Participating teams should fill the relevant fields of each item into this templ
 To restore the ecological validity of large models in practical applications, parameters such as Temperature are set to the official recommended or default values for each model series. Participating teams are not allowed to modify them.
 
 ## Submission Requirements
-Participating teams must organize the adapted items to be submitted into a JSON format output file. Each data entry in the output file should contain four fields: id, text_attack, response_original, and response_attack. For example:
+Participating teams must organize the adapted items to be submitted into a JSON format output file. Each data entry in the output file should contain two fields: `id` and `text_attack`. For example:
 
 ```json
 [
   {
     "id": "0001",
-    "text_attack": "人们不知道西部大开发需要资金和技术，因为负责人指出，从根本来看更需要知识和人才。",
-    "response_original": "T/T/T/T/T/T/T/T/T/T",
-    "response_attack": " U/U/U/T/U/T/T/U/U/T"
+    "text_attack": "人们不知道西部大开发需要资金和技术，因为负责人指出，从根本来看更需要知识和人才。"
   }
 ]
 ```
 
-The `response_original` and `response_attack` fields should contain all answers obtained by the participating team from the 10 repeated calls for the corresponding item. These fields are required for reference. After the team submits the attack set, the system backend will call the model based on text_attack to obtain the real output for calculating the actual score.
-
-Participating teams do not need to perform attack operations on all items in the test set. They only need to submit the items that have actually been adapted. The maximum number of items counted towards the score is 200. Therefore, each team should test, filter, and sort the adapted data themselves, and submit the top 200 items with the best self-tested attack effects.
-
-For example, if a team actually adapted 326 items and submitted all 326 items to the system as an attack sample set, the system will only calculate the inconsistency rate score of the top 200 items in the set as the final result.
+Participating teams do not need to perform attack operations on all items in the test set. They only need to submit the items that have actually been adapted. The maximum number of items counted towards the score is 200. Therefore, each team should test, filter, and sort the adapted data themselves, and submit the top 200 items with the best self-tested attack effects. For example, if a team actually adapted 326 items and submitted all 326 items to the system as an attack sample set, the system will only calculate the inconsistency rate score of the top 200 items in the set as the final result.
 
 In addition, all resources used by the participating teams need to be detailed in the final submitted technical report. All code and results from the experiments must be properly saved for future reference.
 
