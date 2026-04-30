@@ -198,13 +198,11 @@ The adapted sentence must remain basically natural and coherent in terms of ling
 
 If this score is lower than 0.6, the sample will be judged as invalid.
 
-### Script and Program for Self-Check
+### Tool and Script for Self-Check
 
-The algorithmic implementations of the above validity check rules have been released in the `validate` directory of this repository. During the later leaderboard competition stage, the validity determination program used by the evaluation system backend will remain fully consistent with the publicly released self-check program.
+After completing the text adaptation, participating teams may upload their data to the [evaluation tool page](http://124.221.19.182/) and use the “Sample Validity Check” function for automatic checking. Teams are encouraged to use the self-check tool in a timely manner during the data adaptation process to perform basic format checks and validity checks on their samples.
 
-At present, the self-check script needs to be downloaded locally by participating teams and run through a Python interpreter. To lower the usage barrier, the organizers are developing a simple graphical user interface program to help participating teams validate their data more conveniently. The graphical program is expected to be released within one week, and the organizers will notify all participating teams by email at that time.
-
-Participating teams are encouraged to use the self-check program during the data adaptation process to conduct basic format checks and validity checks on their samples, so as to minimize submission errors or invalid samples caused by validity issues.
+The algorithmic implementation of the above validity-checking rules has been publicly released (`validate/validate.py`). Participating teams may also download the code and configure the required environment locally to check their data. During the later leaderboard competition stage, the validity-checking algorithm used by the evaluation backend will remain logically fully consistent with the publicly released self-check tool.
 
 
 ## Evaluation Metric
