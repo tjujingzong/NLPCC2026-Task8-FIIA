@@ -13,8 +13,9 @@
 ## 📢 Updates
 
 ### 2026-04-30
-1. The [Evaluation Metric](#evaluation-metric) has been updated.
-2. The [Submission Requirements](#submission-requirements) have been simplified: the final submission format no longer requires the `response_original` and `response_attack` fields. `validate.py` has also been updated accordingly.
+1. The Sample Validity Check tool is now available: Participating teams may access the [evaluation tool page](http://124.221.19.182/) and use the “Sample Validity Check” function to upload their adapted JSON files at any time. The system will check the validity of each attack sample according to the R1–R5 rules, serving as a pre-submission validity check for compliance with the required format and rules.
+2. The [Evaluation Metric](#evaluation-metric) has been updated.
+3. The [Submission Requirements](#submission-requirements) have been simplified: the final submission format no longer requires the `response_original` and `response_attack` fields. The `validate.py` script has also been updated accordingly.
 
 ### 2026-04-27
 1. The official dataset has been released in the `dataset` directory.
@@ -30,16 +31,13 @@ A: The released dataset, which contains 1,089 data items, is the only official d
 **Q2: Do I need to adapt all 1,089 data items?**  
 A: No. Participating teams may freely select items from the dataset for adaptation and only submit the samples that show better attack performance in self-testing. At most 200 samples will be counted toward the final score.
 
-**Q3: What role do the two large language models specified in this task play?**  
-A: The two large language models specified in this task, Qwen and DeepSeek, serve as the “target models to be attacked.” Specifically, participating teams need to construct `text_attack` and call the specified model using the unified prompt provided in the task instructions, so that the model outputs a T/F/U answer for the given `hypothesis`. Each item should be queried 10 times, and the results of these 10 responses should be recorded.
-
-**Q4: Can I use large language models or other AI tools to help generate attack samples?**  
+**Q3: Can I use large language models or other AI tools to help generate attack samples?**  
 A: Yes. The organizing team does not impose restrictions on how attack texts are generated. Participating teams may generate candidate attack samples through manual rewriting, rule-based programs, large language model assistance, or other methods. The specified target models for this task may also be used for this purpose. However, the final submitted samples must still satisfy the format requirements and validity-checking rules specified in the task instructions.
 
-**Q5: If I want to test the attack effect of my adapted texts on the specified large language models during the preparation stage, who is responsible for the resulting API costs?**  
+**Q4: If I want to test the attack effect of my adapted texts on the specified large language models during the preparation stage, who is responsible for the resulting API costs?**  
 A: API costs incurred during the preliminary exploration and testing stage shall be borne by the participating teams themselves. During the leaderboard competition stage (June 11–June 20), the evaluation system backend and leaderboard will be opened. At that time, teams may submit their attack datasets to the backend and obtain evaluation scores. The API costs incurred during this stage will be covered by the organizing team.
 
-**Q6: What kind of adapted sentence counts as a successful attack?**
+**Q5: What kind of adapted sentence counts as a successful attack?**
 
 A: In short, the modified sentence we expect should make the model's inference results **more inconsistent**. That is, we only care about changes in the consistency rate, not about what the specific answer is. Consider the following example: suppose we select sentence A from the dataset as the original sentence and modify it into two versions, A1 and A2.
 
