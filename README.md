@@ -51,7 +51,7 @@ For modified sentence A1, although the model's judgment changes, its consistency
 # Registration
 
 Participants may register through either of the following channels:
-1. Submit the online registration form via: https://alidocs.dingtalk.com/notable/share/form/v012M9qP5j5D8A1JO01_FSwM4Z8_xbMCeFp
+1. Submit the online registration form: https://alidocs.dingtalk.com/notable/share/form/v012M9qP5j5D8A1JO01_FSwM4Z8_xbMCeFp
 2. Or complete the registration document (FIIA-Registration Form.docx) and submit it via email to liudh@hust.edu.cn.
 
 # Task Introduction
