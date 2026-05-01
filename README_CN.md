@@ -50,7 +50,7 @@ A：简而言之，我们需要的改编句子要能使模型推理结果变得*
 # 报名
 
 有意参赛的团队或个人可通过以下任一渠道进行报名：
-1. 通过以下链接提交在线报名表： https://alidocs.dingtalk.com/notable/share/form/v012M9qP5j5D8A1JO01_FSwM4Z8_xbMCeFp
+1. 提交在线报名表： https://alidocs.dingtalk.com/notable/share/form/v012M9qP5j5D8A1JO01_FSwM4Z8_xbMCeFp
 2. 或填写报名文档 (FIIA-Registration Form.docx) 并通过电子邮件发送至 liudh@hust.edu.cn。
 
 # 任务介绍
