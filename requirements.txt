@@ -1,0 +1,16 @@
+# ============================================================
+# NLPCC2026-Task8 FIIA 项目依赖
+# ============================================================
+
+# --- 基础工具 ---
+python-dotenv>=1.0.0
+
+# --- validate.py 准入核验脚本依赖 ---
+torch>=2.8.0
+transformers>=4.57.6
+
+# --- Track A: Qwen (DashScope API) ---
+dashscope>=1.20.0
+
+# --- Track B: DeepSeek API (OpenAI 兼容协议) ---
+openai>=1.70.0
