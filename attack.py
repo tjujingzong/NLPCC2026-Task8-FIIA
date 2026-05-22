@@ -124,15 +124,11 @@ def multi_turn_eval(client: OpenAI, text: str, hypothesis: str,
             time.sleep(0.5)  # 避免触发频率限制
 
     counts = dict(Counter(answers))
-    # 只统计有效回答 T/F/U（R 不计入一致性计算）
+    # 只统计有效回答 T/F/U（R 不计入一致性计算，但分母固定为总轮数 NUM_ROUNDS）
     valid = {k: v for k, v in counts.items() if k in ("T", "F", "U")}
-    total_valid = sum(valid.values())
-    
-    if total_valid == 0:
-        mir = 0.0  # 全是 R，无法评估一致性
-    else:
-        max_count = max(valid.values())
-        mir = round(1.0 - max_count / total_valid, 4)
+    max_count = max(valid.values()) if valid else 0
+    # MIR = 1 - max(c_T, c_F, c_U) / 10 （分母固定为总轮数，与 README 一致）
+    mir = round(1.0 - max_count / NUM_ROUNDS, 4)
 
     return {"answers": answers, "counts": counts, "mir": mir}
 
