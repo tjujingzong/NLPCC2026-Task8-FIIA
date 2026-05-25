@@ -43,7 +43,7 @@ MODEL_PRO = "deepseek-v4-pro"             # 精炼攻击（更强大的模型）
 
 # --- 路径配置 ---
 DATASET_PATH = "dataset/fiia_0427.json"
-OUTPUT_DIR = "results-v2"
+OUTPUT_DIR = "results-v3"
 PROGRESS_FILE = os.path.join(OUTPUT_DIR, "progress.json")
 
 # --- 评测参数 ---
@@ -58,6 +58,11 @@ SCORE_THRESHOLD = 0.5      # 合格分数阈值
 MAX_REFINEMENT_ROUNDS = 3  # 最大精炼轮数
 BATCH_SIZE = 50            # 每批保存进度
 MAX_WORKERS = 3            # 并行工作线程数（调高可加速但注意 API 限流）
+VALIDATE_MAX_RETRIES = 3   # 每条攻击生成后验证失败最多重试次数
+
+# --- 核验阈值（与 validate.py 一致）---
+LCS_COVERAGE_THRESHOLD = 0.7   # R3 小句完整性阈值
+SIM_THRESHOLD = 0.65           # R4 文本保留度阈值
 
 # 线程安全锁
 _PROGRESS_LOCK = threading.Lock()
@@ -103,7 +108,39 @@ ATTACK_USER_TEMPLATE = """请对下面的句子进行改编，使其可能干扰
 谓词（必须保留）：{predicate}
 假设小句（必须基本保留）：{hypothesis}
 
+⚠️ 示例（来自官方数据，仅供参考）：
+- 原句：人们都知道西部大开发需要资金和技术，但是负责人指出，从根本来看更需要知识和人才。
+- 谓词：知道
+- 假设：西部大开发需要资金和技术。
+- 改编：尽管人们似乎都知道西部大开发需要资金和技术，但在某种程度上负责人却指出，从根本来看或许更需要知识和人才。
+- 策略：多层让步转折（尽管…但…却…）+ 分散模糊限定语（似乎、在某种程度上、或许）
+- 效果：原句一致率100% → 改编后模型判断变得犹豫不决
+
 请优先使用「让步转折结构 + 多重模糊限定语」的组合策略。只给出1个最佳改编版本，格式如下：
+
+策略：xxx
+句子：xxx"""
+
+# --- 验证失败重试 Prompt ---
+VALIDATE_RETRY_TEMPLATE = """你上次生成的攻击句子未通过核验规则，请根据以下错误信息重新生成。
+
+### 核验失败原因
+{errors}
+
+### 原始数据
+- 原句：{text_original}
+- 谓词（必须原样保留在改编句中）：{predicate}
+- 假设小句（必须基本保留）：{hypothesis}
+
+### 上次生成的句子（未通过核验）
+{failed_attack}
+
+### 改编规则提醒
+- R2: 谓词「{predicate}」必须作为连续子串出现在改编句中，不可拆开或变形
+- R3: 假设小句的主要字符必须能在改编句中按顺序找到（LCS覆盖率≥70%）
+- R4: 与原文的编辑距离相似度必须≥65%（改动不能太大，控制在5%~25%）
+
+请严格遵守上述规则重新生成，格式如下：
 
 策略：xxx
 句子：xxx"""
@@ -297,13 +334,100 @@ def save_json(data, filepath: str):
 
 
 # ============================================================
+# 内联核验（R2-R4，纯计算，不需要加载模型）
+# ============================================================
+
+def _calculate_levenshtein_distance(s1: str, s2: str) -> int:
+    """计算两个字符串的编辑距离"""
+    if len(s1) < len(s2):
+        return _calculate_levenshtein_distance(s2, s1)
+    if len(s2) == 0:
+        return len(s1)
+    previous_row = range(len(s2) + 1)
+    for i, c1 in enumerate(s1):
+        current_row = [i + 1]
+        for j, c2 in enumerate(s2):
+            insertions = previous_row[j + 1] + 1
+            deletions = current_row[j] + 1
+            substitutions = previous_row[j] + (c1 != c2)
+            current_row.append(min(insertions, deletions, substitutions))
+        previous_row = current_row
+    return previous_row[-1]
+
+
+def _calculate_lcs_length(a: str, b: str) -> int:
+    """计算最长公共子序列长度"""
+    if not a or not b:
+        return 0
+    m, n = len(a), len(b)
+    dp = [0] * (n + 1)
+    for i in range(1, m + 1):
+        prev = 0
+        for j in range(1, n + 1):
+            temp = dp[j]
+            if a[i - 1] == b[j - 1]:
+                dp[j] = prev + 1
+            else:
+                dp[j] = max(dp[j], dp[j - 1])
+            prev = temp
+    return dp[n]
+
+
+def _normalize_for_lcs(text: str) -> str:
+    """用于 LCS 检查的轻量规范化"""
+    if text is None:
+        return ""
+    remove_chars = set(" \t\r\n，。！？；：、“”‘’\"'（）()《》〈〉【】[]{}.,!?;:-—…·")
+    return "".join(ch for ch in str(text).strip() if ch not in remove_chars)
+
+
+def validate_attack_inline(text_attack: str, item: dict) -> list:
+    """
+    轻量级内联核验 (R2-R4)，纯计算，不需要加载模型。
+    返回错误列表，空列表表示通过。
+    """
+    errors = []
+    predicate = item.get("predicate", "")
+    hypothesis = item.get("hypothesis", "")
+    text_original = item.get("text_original", "")
+
+    if not text_attack or len(text_attack.strip()) < 5:
+        errors.append("R1: 攻击句为空或太短")
+        return errors
+
+    # R2: 谓词必须在 text_attack 中
+    if predicate and predicate not in text_attack:
+        errors.append(f"R2: text_attack中缺失谓词『{predicate}』")
+
+    # R3: 小句完整性 (LCS覆盖率 >= 0.7)
+    norm_hyp = _normalize_for_lcs(hypothesis)
+    norm_text = _normalize_for_lcs(text_attack)
+    if norm_hyp:
+        lcs_len = _calculate_lcs_length(norm_hyp, norm_text)
+        lcs_coverage = lcs_len / len(norm_hyp)
+        if lcs_coverage < LCS_COVERAGE_THRESHOLD:
+            errors.append(f"R3: 小句完整性过低(coverage={lcs_coverage:.3f}<{LCS_COVERAGE_THRESHOLD})")
+
+    # R4: 文本保留度 (编辑距离相似度 >= 0.65)
+    if text_original:
+        dist = _calculate_levenshtein_distance(text_original, text_attack)
+        max_len = max(len(text_original), len(text_attack))
+        similarity = 1 - dist / max_len if max_len > 0 else 1.0
+        if similarity < SIM_THRESHOLD:
+            errors.append(f"R4: 文本保留度过低(similarity={similarity:.3f}<{SIM_THRESHOLD})")
+
+    return errors
+
+
+# ============================================================
 # Phase 1: 初始攻击生成
 # ============================================================
 
-def generate_single_attack(client: OpenAI, item: dict, model: str = MODEL_FLASH) -> dict:
+def generate_single_attack(client: OpenAI, item: dict, model: str = MODEL_PRO) -> dict:
     """
-    对单条样本生成 1 个攻击变体。
-    返回: {"id": str, "text_attack": str, "strategy": str} 或 None
+    对单条样本生成 1 个攻击变体，并内联验证 R2-R4。
+    如果验证失败，将错误反馈给模型重新生成，最多重试 VALIDATE_MAX_RETRIES 次。
+    返回: {"id": str, "text_attack": str, "strategy": str} 或 None（验证始终失败则跳过）
     """
     prompt = ATTACK_USER_TEMPLATE.format(
         text_original=item["text_original"],
@@ -311,6 +435,7 @@ def generate_single_attack(client: OpenAI, item: dict, model: str = MODEL_FLASH)
         hypothesis=item["hypothesis"],
     )
 
+    # 第一次生成
     for attempt in range(MAX_RETRIES):
         try:
             response = client.chat.completions.create(
@@ -327,11 +452,7 @@ def generate_single_attack(client: OpenAI, item: dict, model: str = MODEL_FLASH)
             parsed = parse_attack_response(raw)
             if parsed:
                 strategy, sentence = parsed[0]
-                return {
-                    "id": item["id"],
-                    "text_attack": sentence,
-                    "strategy": strategy,
-                }
+                break
             else:
                 tprint(f"    [警告] 解析失败，回复内容: {raw[:100]}...")
         except Exception as e:
@@ -340,9 +461,61 @@ def generate_single_attack(client: OpenAI, item: dict, model: str = MODEL_FLASH)
                 time.sleep(2 ** attempt)
             else:
                 tprint(f"    [失败] 生成最终失败: {e}")
+                return None
+    else:
+        # 所有 API 尝试均失败
+        return None
 
-    # 降级：最小改动攻击
-    return make_fallback_attack(item)
+    # 验证+重试循环
+    for validate_attempt in range(VALIDATE_MAX_RETRIES):
+        errors = validate_attack_inline(sentence, item)
+        if not errors:
+            # 验证通过
+            return {
+                "id": item["id"],
+                "text_attack": sentence,
+                "strategy": strategy,
+            }
+
+        # 验证失败，反馈重试
+        tprint(f"    [{item['id']}] 验证失败({validate_attempt+1}/{VALIDATE_MAX_RETRIES}): {'; '.join(errors)}")
+
+        if validate_attempt >= VALIDATE_MAX_RETRIES - 1:
+            break  # 已达重试上限
+
+        # 构建重试 prompt
+        retry_prompt = VALIDATE_RETRY_TEMPLATE.format(
+            errors="\n".join(f"- {e}" for e in errors),
+            text_original=item["text_original"],
+            predicate=item["predicate"],
+            hypothesis=item["hypothesis"],
+            failed_attack=sentence,
+        )
+
+        # 重新生成
+        try:
+            response = client.chat.completions.create(
+                model=model,
+                messages=[
+                    {"role": "system", "content": ATTACK_SYSTEM_PROMPT},
+                    {"role": "user", "content": retry_prompt},
+                ],
+                max_tokens=2048,
+                temperature=0.85,
+                extra_body={"thinking": {"type": "disabled"}},
+            )
+            raw = response.choices[0].message.content or ""
+            parsed = parse_attack_response(raw)
+            if parsed:
+                strategy, sentence = parsed[0]
+            else:
+                tprint(f"    [警告] 重试解析失败: {raw[:100]}...")
+        except Exception as e:
+            tprint(f"    [重试失败] 验证重生成异常: {e}")
+
+    # 所有验证重试均失败，跳过该条目
+    tprint(f"    [{item['id']}] ❗ 验证始终失败，放弃该条目")
+    return None
 
 
 def parse_attack_response(text: str) -> list:
@@ -389,7 +562,10 @@ def _worker_generate(item_id: str, item: dict, model: str):
     """Worker: 对单条数据生成攻击（每个线程独立 client）"""
     client = init_client()
     result = generate_single_attack(client, item, model=model)
-    tprint(f"  [{item_id}] 生成完成 | 策略: {result['strategy'][:40] if result else 'N/A'}")
+    if result:
+        tprint(f"  [{item_id}] ✅ 生成完成 | 策略: {result['strategy'][:40]}")
+    else:
+        tprint(f"  [{item_id}] ❌ 生成失败（验证未通过，跳过）")
     return item_id, result
 
 
@@ -409,7 +585,7 @@ def phase_generate_initial_attacks(client: OpenAI, dataset: dict,
     done = len(completed)
 
     print(f"\n{'=' * 60}")
-    print(f"Phase 1: 初始攻击生成 ({MODEL_FLASH}) | 并行度: {workers}")
+    print(f"Phase 1: 初始攻击生成 ({MODEL_PRO}) | 并行度: {workers}")
     print(f"  总数据: {total} 条 | 已完成: {done} | 待处理: {len(pending_ids)}")
     print(f"{'=' * 60}")
 
@@ -430,7 +606,7 @@ def phase_generate_initial_attacks(client: OpenAI, dataset: dict,
             futures = {}
             for item_id in batch_ids:
                 item = dataset[item_id]
-                future = executor.submit(_worker_generate, item_id, item, MODEL_FLASH)
+                future = executor.submit(_worker_generate, item_id, item, MODEL_PRO)
                 futures[future] = item_id
 
             for future in as_completed(futures):
@@ -438,12 +614,11 @@ def phase_generate_initial_attacks(client: OpenAI, dataset: dict,
                     item_id, attack = future.result()
                     if attack:
                         attacks.append(attack)
+                    # 即使 attack 为 None（验证失败）也标记已完成，不再重试
                     completed.add(item_id)
                 except Exception as e:
                     item_id = futures[future]
                     tprint(f"  [{item_id}] Worker 异常: {e}")
-                    fallback = make_fallback_attack(dataset[item_id])
-                    attacks.append(fallback)
                     completed.add(item_id)
 
         # 批次完成后保存进度
@@ -533,10 +708,14 @@ def _worker_evaluate(item_id: str, dataset: dict, attacks: dict, model: str):
 
 def phase_evaluate(client: OpenAI, dataset: dict, attacks: dict,
                    progress: dict, round_num: int,
-                   eval_output_file: str, workers: int = MAX_WORKERS) -> list:
+                   eval_output_file: str, workers: int = MAX_WORKERS,
+                   existing_qualified_count: int = 0,
+                   target: int = 0) -> list:
     """
     并行评估攻击效果。
     attacks: {id: {"text_attack": str, "strategy": str}} 或 {id: text_attack_str}
+    existing_qualified_count: 已有合格数（用于提前终止判断）
+    target: 目标合格数，>0 时开启提前终止
     返回: 评估结果列表 [{id, mir_orig, mir_attack, score, ...}]
     """
     eval_key = f"eval_round{round_num}_completed"
@@ -593,6 +772,15 @@ def phase_evaluate(client: OpenAI, dataset: dict, attacks: dict,
         save_progress(progress)
         save_json(results, eval_output_file)
         print(f"  [进度] 已评估 {len(results)} 条，保存至 {eval_output_file}")
+
+        # 提前终止检查：已有合格 + 本轮新合格 >= 目标
+        if target > 0:
+            new_qualified = sum(1 for r in results_dict.values()
+                                if r.get("score", 0) >= SCORE_THRESHOLD)
+            if existing_qualified_count + new_qualified >= target:
+                print(f"\n  🎯 提前终止！已有合格 {existing_qualified_count} + 本轮新合格 {new_qualified} = "
+                      f"{existing_qualified_count + new_qualified} 条 ≥ 目标 {target}，停止评估")
+                break
 
     # 最终保存
     results = [results_dict[iid] for iid in sorted(results_dict.keys())]
@@ -686,8 +874,8 @@ def refine_single_attack(client: OpenAI, eval_result: dict,
                          dataset: dict) -> dict:
     """
     基于上次评估结果，使用 Pro 模型重新生成攻击。
-    eval_result: 来自 evaluate_single_item 的完整结果
-    返回: {"id": str, "text_attack": str, "strategy": str} 或 None
+    生成后内联验证 R2-R4，失败则反馈重试，最多 VALIDATE_MAX_RETRIES 次。
+    返回: {"id": str, "text_attack": str, "strategy": str, ...} 或 None
     """
     item_id = eval_result["id"]
     item = dataset.get(item_id)
@@ -719,6 +907,7 @@ def refine_single_attack(client: OpenAI, eval_result: dict,
         score_gap=score_gap,
     )
 
+    # 第一次生成
     for attempt in range(MAX_RETRIES):
         try:
             response = client.chat.completions.create(
@@ -735,13 +924,7 @@ def refine_single_attack(client: OpenAI, eval_result: dict,
             parsed = parse_attack_response(raw)
             if parsed:
                 strategy, sentence = parsed[0]
-                return {
-                    "id": item_id,
-                    "text_attack": sentence,
-                    "strategy": strategy,
-                    "prev_score": eval_result["score"],
-                    "prev_strategy": eval_result.get("strategy", ""),
-                }
+                break
             else:
                 tprint(f"    [警告] Pro 模型解析失败: {raw[:100]}...")
         except Exception as e:
@@ -751,7 +934,58 @@ def refine_single_attack(client: OpenAI, eval_result: dict,
                 time.sleep(wait)
             else:
                 tprint(f"    [失败] Pro 生成最终失败: {e}")
+                return None
+    else:
+        return None
 
+    # 验证+重试循环
+    for validate_attempt in range(VALIDATE_MAX_RETRIES):
+        errors = validate_attack_inline(sentence, item)
+        if not errors:
+            return {
+                "id": item_id,
+                "text_attack": sentence,
+                "strategy": strategy,
+                "prev_score": eval_result["score"],
+                "prev_strategy": eval_result.get("strategy", ""),
+            }
+
+        # 验证失败，反馈重试
+        tprint(f"    [{item_id}] 精炼验证失败({validate_attempt+1}/{VALIDATE_MAX_RETRIES}): {'; '.join(errors)}")
+
+        if validate_attempt >= VALIDATE_MAX_RETRIES - 1:
+            break
+
+        retry_prompt = VALIDATE_RETRY_TEMPLATE.format(
+            errors="\n".join(f"- {e}" for e in errors),
+            text_original=item["text_original"],
+            predicate=item["predicate"],
+            hypothesis=item["hypothesis"],
+            failed_attack=sentence,
+        )
+
+        try:
+            response = client.chat.completions.create(
+                model=MODEL_PRO,
+                messages=[
+                    {"role": "system", "content": REFINE_SYSTEM_PROMPT},
+                    {"role": "user", "content": retry_prompt},
+                ],
+                max_tokens=2048,
+                temperature=0.8,
+                extra_body={"thinking": {"type": "disabled"}},
+            )
+            raw = response.choices[0].message.content or ""
+            parsed = parse_attack_response(raw)
+            if parsed:
+                strategy, sentence = parsed[0]
+            else:
+                tprint(f"    [警告] 精炼重试解析失败: {raw[:100]}...")
+        except Exception as e:
+            tprint(f"    [重试失败] 精炼验证重生成异常: {e}")
+
+    # 验证始终失败
+    tprint(f"    [{item_id}] ❗ 精炼验证始终失败，放弃该条目")
     return None
 
 
@@ -761,10 +995,11 @@ def _worker_refine(eval_result: dict, dataset: dict):
     client = init_client()
     refined = refine_single_attack(client, eval_result, dataset)
     if refined:
-        tprint(f"  [{item_id}] 精炼完成 | 新策略: {refined['strategy'][:40]}")
+        tprint(f"  [{item_id}] ✅ 精炼完成 | 新策略: {refined['strategy'][:40]}")
         return item_id, refined
     else:
-        tprint(f"  [{item_id}] 精炼失败，保留原攻击")
+        # 精炼失败（验证未通过），保留原攻击供后续评估
+        tprint(f"  [{item_id}] ❌ 精炼失败，保留原攻击")
         return item_id, {
             "id": item_id,
             "text_attack": eval_result.get("text_attack", ""),
@@ -986,6 +1221,8 @@ def run_pipeline(args):
             progress, round_num=1,
             eval_output_file="02_eval_round1.json",
             workers=workers,
+            existing_qualified_count=0,
+            target=TARGET_COUNT,
         )
         progress["phase"] = "round1_evaluated"
         save_progress(progress)
@@ -1050,6 +1287,8 @@ def run_pipeline(args):
             progress, round_num=round_label,
             eval_output_file=eval_file,
             workers=workers,
+            existing_qualified_count=len(qualified_pool),
+            target=TARGET_COUNT,
         )
         progress["phase"] = f"round{round_label}_evaluated"
         save_progress(progress)
